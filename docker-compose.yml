@@ -1,0 +1,24 @@
+# Infraestructura de desarrollo local. Las credenciales son solo para desarrollo y
+# coinciden con los valores por defecto de backend/src/main/resources/application.yml.
+services:
+  postgres:
+    image: postgres:16
+    container_name: upland-postgres
+    environment:
+      POSTGRES_DB: upland
+      POSTGRES_USER: upland
+      POSTGRES_PASSWORD: upland
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Permite usar "docker compose up -d --wait": el comando retorna cuando PostgreSQL ya
+    # acepta conexiones, no solo cuando el contenedor arrancó.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U upland -d upland"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
