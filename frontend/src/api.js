@@ -1,8 +1,8 @@
 // Cliente de la API. Todas las llamadas HTTP del frontend salen por peticion(), así que el
 // header Authorization y el manejo del 401 están escritos una sola vez. Este archivo no
-// toca el DOM: en la fase 2 lo puede importar React tal como está.
+// sabe nada de React: es el mismo de la fase 1, con las llamadas de búsqueda agregadas.
 import { API_URL } from './config.js';
-import { obtenerToken, cerrarSesion } from './sesion.js';
+import { obtenerToken, borrarToken } from './sesion.js';
 
 // Error con el formato { codigo, mensaje, detalles } que devuelve el backend.
 export class ErrorApi extends Error {
@@ -34,16 +34,31 @@ async function peticion(metodo, ruta, { cuerpo, conToken = true } = {}) {
 
   // Un 401 en una llamada que llevaba token significa que el token venció o no es válido:
   // se borra y se manda al login. El 401 del propio login no lleva token y no entra aquí,
-  // así la pantalla de login puede mostrar "credenciales incorrectas".
+  // así la pantalla de login puede mostrar "credenciales incorrectas". La redirección es
+  // una carga completa de la página a propósito: reinicia todo el estado de React.
   if (respuesta.status === 401 && token) {
-    cerrarSesion();
-    window.location.assign('login.html?motivo=sesion');
+    borrarToken();
+    window.location.assign('/login?motivo=sesion');
   }
 
   if (respuesta.status === 204) return null;
   const datos = await respuesta.json().catch(() => null);
   if (!respuesta.ok) throw new ErrorApi(respuesta.status, datos);
   return datos;
+}
+
+// Convierte un objeto de filtros en parámetros de URL. Los valores vacíos se omiten y los
+// arreglos se repiten (?servicios=Wifi&servicios=Cocina), que es como los espera el backend.
+function aParametros(filtros) {
+  const parametros = new URLSearchParams();
+  for (const [clave, valor] of Object.entries(filtros)) {
+    if (Array.isArray(valor)) {
+      valor.forEach((elemento) => parametros.append(clave, elemento));
+    } else if (valor !== '' && valor !== null && valor !== undefined) {
+      parametros.set(clave, valor);
+    }
+  }
+  return parametros;
 }
 
 // --- Autenticación ---
@@ -62,8 +77,12 @@ export function obtenerYo() {
 
 // --- Alojamientos ---
 
-export function listarAlojamientos(pagina, tamano) {
-  return peticion('GET', `/api/alojamientos?pagina=${pagina}&tamano=${tamano}`, { conToken: false });
+export function buscarAlojamientos(filtros) {
+  return peticion('GET', `/api/alojamientos?${aParametros(filtros)}`, { conToken: false });
+}
+
+export function obtenerOpcionesDeFiltro() {
+  return peticion('GET', '/api/alojamientos/filtros', { conToken: false });
 }
 
 export function obtenerAlojamiento(id) {
