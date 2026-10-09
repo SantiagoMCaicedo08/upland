@@ -323,12 +323,20 @@ presentar:
 ## Comandos
 
 ```bash
-docker compose up -d       # levanta PostgreSQL (desde la raíz)
-npx http-server frontend -p 5500 -c-1   # sirve el frontend en http://localhost:5500 (desde la raíz)
+# main es la fase 2 (frontend en React). La fase 1 entregada está en la rama fase-1.
 
-# Datos de demostración (desde la raíz, con el backend ya arrancado una vez)
+# Todo de una vez, cada servidor en su ventana (desde la raíz, en PowerShell):
+powershell -ExecutionPolicy Bypass -File scripts\iniciar-fase2.ps1     # fase 2, esta carpeta
+powershell -ExecutionPolicy Bypass -File scripts\presentar-fase1.ps1   # fase 1, en ..\upland-fase1 y con su propia base
+
+# O paso a paso:
+docker compose up -d       # levanta PostgreSQL (desde la raíz)
+cd frontend && npm install && npm run dev   # frontend React en http://localhost:5500
+
+# Datos (desde la raíz, con el backend ya arrancado una vez). En PowerShell, no en Git Bash.
 docker cp db/semilla.sql upland-postgres:/tmp/semilla.sql
 docker exec upland-postgres psql -U upland -d upland -f /tmp/semilla.sql
+# Después, opcionales: db/importar_bogota.sql y db/generar_reservas_demo.sql (ver sus encabezados)
 
 # Los siguientes van desde backend/. En PowerShell: .\mvnw.cmd en vez de ./mvnw
 ./mvnw spring-boot:run     # arranca el backend
