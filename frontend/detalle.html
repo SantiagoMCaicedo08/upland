@@ -15,14 +15,24 @@
     <div id="error" class="error" role="alert" hidden></div>
 
     <article id="alojamiento" hidden>
-      <p id="ciudad" class="tarjeta-ciudad"></p>
+      <div class="detalle-foto">
+        <img id="foto" alt="" hidden>
+      </div>
+      <div class="tarjeta-cabecera">
+        <p id="ciudad" class="tarjeta-ciudad"></p>
+        <p id="calificacion" class="tarjeta-calificacion" hidden></p>
+      </div>
       <h1 id="titulo"></h1>
       <p id="descripcion" class="descripcion"></p>
 
+      <ul id="servicios" class="etiquetas" hidden></ul>
+
       <dl class="ficha">
+        <dt>Tipo</dt>
+        <dd id="tipo"></dd>
         <dt>Dirección</dt>
         <dd id="direccion"></dd>
-        <dt>Capacidad</dt>
+        <dt>Espacio</dt>
         <dd id="capacidad"></dd>
         <dt>Precio por noche</dt>
         <dd id="precio"></dd>

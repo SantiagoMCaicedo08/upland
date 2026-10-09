@@ -1,7 +1,9 @@
 // Catálogo público: no exige sesión y sus llamadas no llevan token.
 import { listarAlojamientos } from './api.js';
 import { montarNav } from './nav.js';
-import { describirCapacidad, formatearPrecio, mostrarError, ocultar } from './ui.js';
+import {
+  describirCalificacion, describirEspacio, describirUbicacion, formatearPrecio, mostrarError, ocultar, ponerFoto,
+} from './ui.js';
 
 const TAMANO_PAGINA = 6;
 
@@ -18,9 +20,16 @@ let pagina = 0;
 function crearTarjeta(alojamiento) {
   const tarjeta = plantilla.content.cloneNode(true);
   tarjeta.querySelector('.tarjeta').href = `detalle.html?id=${encodeURIComponent(alojamiento.id)}`;
-  tarjeta.querySelector('.tarjeta-ciudad').textContent = alojamiento.ciudad;
+  tarjeta.querySelector('.tarjeta-ciudad').textContent = describirUbicacion(alojamiento);
   tarjeta.querySelector('.tarjeta-titulo').textContent = alojamiento.titulo;
-  tarjeta.querySelector('.tarjeta-capacidad').textContent = describirCapacidad(alojamiento.capacidad);
+  tarjeta.querySelector('.tarjeta-capacidad').textContent = describirEspacio(alojamiento);
+  ponerFoto(tarjeta.querySelector('.tarjeta-imagen'), alojamiento.fotoUrl, 480);
+
+  if (alojamiento.calificacion !== null) {
+    const calificacion = tarjeta.querySelector('.tarjeta-calificacion');
+    calificacion.textContent = describirCalificacion(alojamiento);
+    calificacion.hidden = false;
+  }
   tarjeta.querySelector('.tarjeta-precio').textContent = `${formatearPrecio(alojamiento.precioNoche)} por noche`;
   return tarjeta;
 }

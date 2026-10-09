@@ -4,7 +4,8 @@ import { obtenerAlojamiento, obtenerOcupacion, crearReserva } from './api.js';
 import { datosDelToken } from './sesion.js';
 import { montarNav } from './nav.js';
 import {
-  contarNoches, describirCapacidad, describirNoches, formatearFecha, formatearPrecio, mostrarError, ocultar,
+  contarNoches, describirCalificacion, describirEspacio, describirNoches, describirTipo, describirUbicacion,
+  formatearFecha, formatearPrecio, mostrarError, ocultar, ponerFoto,
 } from './ui.js';
 
 const id = new URLSearchParams(window.location.search).get('id');
@@ -17,12 +18,34 @@ let precioNoche = 0;
 
 function pintarAlojamiento(alojamiento) {
   document.title = `${alojamiento.titulo} · Upland`;
-  document.getElementById('ciudad').textContent = alojamiento.ciudad;
+  document.getElementById('ciudad').textContent = describirUbicacion(alojamiento);
   document.getElementById('titulo').textContent = alojamiento.titulo;
   document.getElementById('descripcion').textContent = alojamiento.descripcion;
+  document.getElementById('tipo').textContent = describirTipo(alojamiento.tipo);
   document.getElementById('direccion').textContent = alojamiento.direccion;
-  document.getElementById('capacidad').textContent = describirCapacidad(alojamiento.capacidad);
+  document.getElementById('capacidad').textContent = describirEspacio(alojamiento)
+    + (alojamiento.banos ? ` · ${alojamiento.banos} ${alojamiento.banos === 1 ? 'baño' : 'baños'}` : '');
   document.getElementById('precio').textContent = formatearPrecio(alojamiento.precioNoche);
+
+  const foto = document.getElementById('foto');
+  foto.hidden = false;
+  ponerFoto(foto, alojamiento.fotoUrl, 960);
+
+  if (alojamiento.calificacion !== null) {
+    const calificacion = document.getElementById('calificacion');
+    calificacion.textContent = describirCalificacion(alojamiento);
+    calificacion.hidden = false;
+  }
+
+  if (alojamiento.servicios.length > 0) {
+    const servicios = document.getElementById('servicios');
+    servicios.replaceChildren(...alojamiento.servicios.map((servicio) => {
+      const item = document.createElement('li');
+      item.textContent = servicio;
+      return item;
+    }));
+    servicios.hidden = false;
+  }
 
   if (alojamiento.latitud !== null) {
     document.getElementById('coordenadas').textContent = `${alojamiento.latitud}, ${alojamiento.longitud}`;

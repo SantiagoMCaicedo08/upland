@@ -8,3 +8,6 @@
 # Sistema operativo
 Thumbs.db
 .DS_Store
+
+# Datasets descargados (no se versionan: pesan y tienen su propia licencia)
+datos/

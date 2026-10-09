@@ -2,9 +2,15 @@ package com.uis.upland.alojamientos.domain;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -42,12 +48,38 @@ public class Alojamiento {
 
 	private Instant fechaCreacion;
 
+	// Los atributos de catálogo que siguen todavía no se editan desde el formulario: se
+	// leen para mostrar y filtrar, y hoy los llena la importación del dataset.
+
+	@Enumerated(EnumType.STRING)
+	private TipoAlojamiento tipo;
+
+	private String zona;
+
+	private Integer habitaciones;
+
+	private Integer camas;
+
+	private BigDecimal banos;
+
+	// La columna es text[]; sin esta anotación Hibernate intentaría guardarla serializada.
+	@JdbcTypeCode(SqlTypes.ARRAY)
+	private List<String> servicios;
+
+	private String fotoUrl;
+
+	private BigDecimal calificacion;
+
+	private int numeroResenas;
+
 	/** Constructor que exige JPA; no se usa desde el código. */
 	protected Alojamiento() {
 	}
 
 	public Alojamiento(UUID anfitrionId, DatosAlojamiento datos) {
 		this.anfitrionId = anfitrionId;
+		this.tipo = TipoAlojamiento.ALOJAMIENTO_ENTERO;
+		this.servicios = List.of();
 		this.activo = true;
 		this.fechaCreacion = Instant.now();
 		actualizar(datos);
@@ -114,6 +146,42 @@ public class Alojamiento {
 
 	public Instant getFechaCreacion() {
 		return fechaCreacion;
+	}
+
+	public TipoAlojamiento getTipo() {
+		return tipo;
+	}
+
+	public String getZona() {
+		return zona;
+	}
+
+	public Integer getHabitaciones() {
+		return habitaciones;
+	}
+
+	public Integer getCamas() {
+		return camas;
+	}
+
+	public BigDecimal getBanos() {
+		return banos;
+	}
+
+	public List<String> getServicios() {
+		return servicios;
+	}
+
+	public String getFotoUrl() {
+		return fotoUrl;
+	}
+
+	public BigDecimal getCalificacion() {
+		return calificacion;
+	}
+
+	public int getNumeroResenas() {
+		return numeroResenas;
 	}
 
 }

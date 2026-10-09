@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Upland · Alojamientos en Santander</title>
+  <title>Upland · Alojamientos</title>
   <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
   </header>
 
   <main class="contenedor">
-    <h1>Alojamientos en Santander</h1>
+    <h1>Alojamientos</h1>
     <div id="error" class="error" role="alert" hidden></div>
     <p id="vacio" class="suave" hidden>Todavía no hay alojamientos publicados.</p>
 
@@ -27,10 +27,18 @@
 
   <template id="plantilla-tarjeta">
     <a class="tarjeta">
-      <p class="tarjeta-ciudad"></p>
-      <h2 class="tarjeta-titulo"></h2>
-      <p class="suave tarjeta-capacidad"></p>
-      <p class="tarjeta-precio"></p>
+      <div class="tarjeta-foto">
+        <img class="tarjeta-imagen" alt="" loading="lazy">
+      </div>
+      <div class="tarjeta-cuerpo">
+        <div class="tarjeta-cabecera">
+          <p class="tarjeta-ciudad"></p>
+          <p class="tarjeta-calificacion" hidden></p>
+        </div>
+        <h2 class="tarjeta-titulo"></h2>
+        <p class="suave tarjeta-capacidad"></p>
+        <p class="tarjeta-precio"></p>
+      </div>
     </a>
   </template>
 

@@ -14,6 +14,50 @@ export function describirCapacidad(capacidad) {
   return capacidad === 1 ? '1 huésped' : `${capacidad} huéspedes`;
 }
 
+const NOMBRES_TIPO = {
+  ALOJAMIENTO_ENTERO: 'Alojamiento entero',
+  HABITACION_PRIVADA: 'Habitación privada',
+  HABITACION_COMPARTIDA: 'Habitación compartida',
+  HOTEL: 'Hotel',
+};
+
+export function describirTipo(tipo) {
+  return NOMBRES_TIPO[tipo] ?? tipo;
+}
+
+// "Chapinero, Bogotá" cuando hay zona; solo la ciudad cuando no.
+export function describirUbicacion(alojamiento) {
+  return alojamiento.zona ? `${alojamiento.zona}, ${alojamiento.ciudad}` : alojamiento.ciudad;
+}
+
+// "4 huéspedes · 2 habitaciones · 3 camas", omitiendo lo que el alojamiento no tenga registrado.
+export function describirEspacio(alojamiento) {
+  const partes = [describirCapacidad(alojamiento.capacidad)];
+  if (alojamiento.habitaciones) {
+    partes.push(alojamiento.habitaciones === 1 ? '1 habitación' : `${alojamiento.habitaciones} habitaciones`);
+  }
+  if (alojamiento.camas) {
+    partes.push(alojamiento.camas === 1 ? '1 cama' : `${alojamiento.camas} camas`);
+  }
+  return partes.join(' · ');
+}
+
+export function describirCalificacion(alojamiento) {
+  return `★ ${alojamiento.calificacion.toFixed(2)} (${alojamiento.numeroResenas})`;
+}
+
+// Las fotos del dataset están alojadas fuera de Upland. Si una deja de existir o no hay
+// foto, se oculta la imagen y queda el fondo de color del contenedor.
+export function ponerFoto(imagen, fotoUrl, ancho) {
+  if (!fotoUrl) {
+    imagen.hidden = true;
+    return;
+  }
+  imagen.addEventListener('error', () => { imagen.hidden = true; }, { once: true });
+  // im_w le pide al servidor de imágenes una versión reducida en vez del original.
+  imagen.src = `${fotoUrl}?im_w=${ancho}`;
+}
+
 export function describirNoches(noches) {
   return noches === 1 ? '1 noche' : `${noches} noches`;
 }
