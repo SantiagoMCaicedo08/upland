@@ -1,8 +1,11 @@
 package com.uis.upland.alojamientos.api;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +20,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uis.upland.alojamientos.domain.AlojamientoService;
+import com.uis.upland.alojamientos.domain.CriteriosBusqueda;
+import com.uis.upland.alojamientos.domain.OpcionesFiltro;
+import com.uis.upland.alojamientos.domain.OrdenBusqueda;
 import com.uis.upland.alojamientos.domain.ResumenAlojamiento;
+import com.uis.upland.alojamientos.domain.TipoAlojamiento;
 import com.uis.upland.shared.Pagina;
 import com.uis.upland.shared.security.UsuarioAutenticado;
 
@@ -34,10 +41,36 @@ public class AlojamientoController {
 		this.alojamientoService = alojamientoService;
 	}
 
+	/** Catálogo público. Todos los filtros son opcionales y se combinan entre sí. */
 	@GetMapping
-	public Pagina<ResumenAlojamiento> listar(@RequestParam(defaultValue = "0") int pagina,
+	public Pagina<ResumenAlojamiento> buscar(
+			@RequestParam(required = false) String ciudad,
+			@RequestParam(required = false) String zona,
+			@RequestParam(required = false) TipoAlojamiento tipo,
+			@RequestParam(required = false) BigDecimal precioMin,
+			@RequestParam(required = false) BigDecimal precioMax,
+			@RequestParam(required = false) Integer huespedes,
+			@RequestParam(required = false) Integer habitaciones,
+			@RequestParam(required = false) List<String> servicios,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entrada,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate salida,
+			@RequestParam(defaultValue = "POPULARES") OrdenBusqueda orden,
+			@RequestParam(defaultValue = "0") int pagina,
 			@RequestParam(defaultValue = "12") int tamano) {
-		return alojamientoService.listar(pagina, tamano);
+		// Un parámetro que llega vacío (?ciudad=) cuenta como ausente.
+		CriteriosBusqueda criterios = new CriteriosBusqueda(vacioANulo(ciudad), vacioANulo(zona), tipo, precioMin,
+				precioMax, huespedes, habitaciones, servicios == null ? List.of() : servicios, entrada, salida, orden);
+		return alojamientoService.buscar(criterios, pagina, tamano);
+	}
+
+	/** Ciudades, zonas, servicios y rango de precios disponibles para filtrar. */
+	@GetMapping("/filtros")
+	public OpcionesFiltro opcionesDeFiltro() {
+		return alojamientoService.opcionesDeFiltro();
+	}
+
+	private static String vacioANulo(String texto) {
+		return texto == null || texto.isBlank() ? null : texto.trim();
 	}
 
 	@GetMapping("/mios")

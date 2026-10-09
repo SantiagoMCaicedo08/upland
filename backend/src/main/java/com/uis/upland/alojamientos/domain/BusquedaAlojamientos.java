@@ -9,6 +9,8 @@ import com.uis.upland.shared.Pagina;
  */
 public interface BusquedaAlojamientos {
 
-	Pagina<ResumenAlojamiento> listarActivos(int pagina, int tamano);
+	Pagina<ResumenAlojamiento> buscar(CriteriosBusqueda criterios, int pagina, int tamano);
+
+	OpcionesFiltro opcionesDeFiltro();
 
 }

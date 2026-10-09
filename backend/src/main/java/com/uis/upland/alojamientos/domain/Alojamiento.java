@@ -48,9 +48,6 @@ public class Alojamiento {
 
 	private Instant fechaCreacion;
 
-	// Los atributos de catálogo que siguen todavía no se editan desde el formulario: se
-	// leen para mostrar y filtrar, y hoy los llena la importación del dataset.
-
 	@Enumerated(EnumType.STRING)
 	private TipoAlojamiento tipo;
 
@@ -68,6 +65,8 @@ public class Alojamiento {
 
 	private String fotoUrl;
 
+	// Calificación y número de reseñas no los escribe el anfitrión. Hoy vienen del dataset
+	// importado; cuando exista el módulo de reseñas se calcularán desde él.
 	private BigDecimal calificacion;
 
 	private int numeroResenas;
@@ -78,8 +77,6 @@ public class Alojamiento {
 
 	public Alojamiento(UUID anfitrionId, DatosAlojamiento datos) {
 		this.anfitrionId = anfitrionId;
-		this.tipo = TipoAlojamiento.ALOJAMIENTO_ENTERO;
-		this.servicios = List.of();
 		this.activo = true;
 		this.fechaCreacion = Instant.now();
 		actualizar(datos);
@@ -89,11 +86,18 @@ public class Alojamiento {
 		this.titulo = datos.titulo();
 		this.descripcion = datos.descripcion();
 		this.ciudad = datos.ciudad();
+		this.zona = datos.zona();
 		this.direccion = datos.direccion();
 		this.latitud = datos.latitud();
 		this.longitud = datos.longitud();
+		this.tipo = datos.tipo();
 		this.capacidad = datos.capacidad();
+		this.habitaciones = datos.habitaciones();
+		this.camas = datos.camas();
+		this.banos = datos.banos();
+		this.servicios = datos.servicios();
 		this.precioNoche = datos.precioNoche();
+		this.fotoUrl = datos.fotoUrl();
 	}
 
 	public void desactivar() {
