@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Upland · Alojamientos en Santander</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="cabecera">
+    <nav id="nav" class="nav" aria-label="Principal"></nav>
+  </header>
+
+  <main class="contenedor">
+    <h1>Alojamientos en Santander</h1>
+    <div id="error" class="error" role="alert" hidden></div>
+    <p id="vacio" class="suave" hidden>Todavía no hay alojamientos publicados.</p>
+
+    <section id="catalogo" class="rejilla" aria-label="Catálogo"></section>
+
+    <div class="paginacion">
+      <button id="anterior" type="button" class="boton boton-secundario" disabled>Anterior</button>
+      <span id="pagina-actual" class="suave"></span>
+      <button id="siguiente" type="button" class="boton boton-secundario" disabled>Siguiente</button>
+    </div>
+  </main>
+
+  <template id="plantilla-tarjeta">
+    <a class="tarjeta">
+      <p class="tarjeta-ciudad"></p>
+      <h2 class="tarjeta-titulo"></h2>
+      <p class="suave tarjeta-capacidad"></p>
+      <p class="tarjeta-precio"></p>
+    </a>
+  </template>
+
+  <script type="module" src="js/index.js"></script>
+</body>
+</html>

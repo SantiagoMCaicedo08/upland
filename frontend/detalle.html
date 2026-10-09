@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alojamiento · Upland</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="cabecera">
+    <nav id="nav" class="nav" aria-label="Principal"></nav>
+  </header>
+
+  <main class="contenedor contenedor-medio">
+    <div id="error" class="error" role="alert" hidden></div>
+
+    <article id="alojamiento" hidden>
+      <p id="ciudad" class="tarjeta-ciudad"></p>
+      <h1 id="titulo"></h1>
+      <p id="descripcion" class="descripcion"></p>
+
+      <dl class="ficha">
+        <dt>Dirección</dt>
+        <dd id="direccion"></dd>
+        <dt>Capacidad</dt>
+        <dd id="capacidad"></dd>
+        <dt>Precio por noche</dt>
+        <dd id="precio"></dd>
+        <dt id="coordenadas-etiqueta" hidden>Coordenadas</dt>
+        <dd id="coordenadas" hidden></dd>
+      </dl>
+
+      <a id="editar" class="boton" hidden>Editar alojamiento</a>
+
+      <section id="ocupacion" hidden>
+        <div class="fila-titulo">
+          <h2>Fechas ya reservadas</h2>
+        </div>
+        <ul id="rangos-ocupados" class="lista-simple"></ul>
+      </section>
+
+      <section id="seccion-reserva" hidden>
+        <div class="fila-titulo">
+          <h2>Reservar</h2>
+        </div>
+        <div id="error-reserva" class="error" role="alert" hidden></div>
+        <form id="formulario" class="formulario">
+          <div class="campos-en-fila">
+            <div class="campo">
+              <label for="fechaEntrada">Entrada</label>
+              <input id="fechaEntrada" name="fechaEntrada" type="date" required>
+            </div>
+            <div class="campo">
+              <label for="fechaSalida">Salida</label>
+              <input id="fechaSalida" name="fechaSalida" type="date" required>
+            </div>
+          </div>
+          <p id="resumen-reserva" class="suave">Elige las fechas para ver el total.</p>
+          <button id="enviar" type="submit" class="boton">Reservar</button>
+        </form>
+      </section>
+
+      <p id="invitacion" class="aviso" hidden>
+        <a href="login.html">Inicia sesión</a> para reservar este alojamiento.
+      </p>
+    </article>
+
+    <p class="pie-formulario"><a href="index.html">Volver al catálogo</a></p>
+  </main>
+
+  <script type="module" src="js/detalle.js"></script>
+</body>
+</html>

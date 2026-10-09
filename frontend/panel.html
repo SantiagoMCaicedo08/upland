@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi panel · Upland</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="cabecera">
+    <nav id="nav" class="nav" aria-label="Principal"></nav>
+  </header>
+
+  <main class="contenedor">
+    <h1 id="saludo">Mi panel</h1>
+    <div id="error" class="error" role="alert" hidden></div>
+
+    <dl id="cuenta" class="ficha" hidden>
+      <dt>Email</dt>
+      <dd id="cuenta-email"></dd>
+      <dt>Tipo de cuenta</dt>
+      <dd id="cuenta-rol"></dd>
+    </dl>
+
+    <section id="seccion-anfitrion" hidden>
+      <div class="fila-titulo">
+        <h2>Mis alojamientos</h2>
+        <a id="publicar" class="boton" href="alojamiento.html">Publicar alojamiento</a>
+      </div>
+      <p id="sin-alojamientos" class="suave" hidden>Todavía no has publicado ningún alojamiento.</p>
+      <ul id="mis-alojamientos" class="lista"></ul>
+    </section>
+
+    <section id="seccion-recibidas" hidden>
+      <div class="fila-titulo">
+        <h2>Reservas recibidas</h2>
+        <p id="total-ganado" class="total"></p>
+      </div>
+      <p id="sin-recibidas" class="suave" hidden>Todavía nadie ha reservado tus alojamientos.</p>
+      <ul id="reservas-recibidas" class="lista"></ul>
+    </section>
+
+    <section id="seccion-mis-reservas" hidden>
+      <div class="fila-titulo">
+        <h2>Mis reservas</h2>
+      </div>
+      <p id="sin-reservas" class="suave" hidden>
+        Todavía no has reservado. Explora el <a href="index.html">catálogo de alojamientos</a>.
+      </p>
+      <ul id="mis-reservas" class="lista"></ul>
+    </section>
+  </main>
+
+  <template id="plantilla-reserva">
+    <li class="fila">
+      <div>
+        <a class="fila-nombre"></a>
+        <p class="suave reserva-fechas"></p>
+        <p class="suave reserva-huesped" hidden></p>
+      </div>
+      <div class="reserva-valor">
+        <p class="total reserva-total"></p>
+        <p class="suave reserva-estado"></p>
+      </div>
+    </li>
+  </template>
+
+  <template id="plantilla-fila">
+    <li class="fila">
+      <div>
+        <a class="fila-nombre"></a>
+        <p class="suave fila-datos"></p>
+      </div>
+      <div class="acciones">
+        <a class="boton boton-secundario editar">Editar</a>
+        <button type="button" class="boton boton-peligro eliminar">Eliminar</button>
+      </div>
+    </li>
+  </template>
+
+  <script type="module" src="js/panel.js"></script>
+</body>
+</html>

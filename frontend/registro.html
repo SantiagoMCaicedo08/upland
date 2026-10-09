@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crear cuenta · Upland</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="cabecera">
+    <nav id="nav" class="nav" aria-label="Principal"></nav>
+  </header>
+
+  <main class="contenedor contenedor-angosto">
+    <h1>Crear cuenta</h1>
+    <div id="error" class="error" role="alert" hidden></div>
+
+    <form id="formulario" class="formulario">
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" name="nombre" type="text" autocomplete="name" maxlength="120" required>
+      </div>
+      <div class="campo">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" maxlength="255" required>
+      </div>
+      <div class="campo">
+        <label for="password">Contraseña</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+        <small class="suave">Mínimo 8 caracteres.</small>
+      </div>
+      <div class="campo">
+        <label for="rol">¿Para qué usarás Upland?</label>
+        <select id="rol" name="rol">
+          <option value="HUESPED">Quiero hospedarme</option>
+          <option value="ANFITRION">Quiero publicar alojamientos</option>
+        </select>
+      </div>
+      <button id="enviar" type="submit" class="boton">Crear cuenta</button>
+    </form>
+
+    <p class="pie-formulario">¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+  </main>
+
+  <script type="module" src="js/registro.js"></script>
+</body>
+</html>
