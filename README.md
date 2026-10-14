@@ -36,6 +36,7 @@ De la fase 1:
 - Registro y login con JWT.
 - CRUD completo de alojamientos, protegido por rol y por propietario.
 - Reservas por rango de fechas, sin superposición.
+- Una factura por cada reserva, que el huésped y el anfitrión pueden ver e imprimir.
 - Panel del huésped (sus reservas) y del anfitrión (sus alojamientos, las reservas
   recibidas y el total ganado).
 
@@ -381,6 +382,30 @@ El total lo calcula el servidor a partir del precio del alojamiento. Si las fech
 cruzan con otra reserva confirmada responde 409. El día de salida queda libre: un huésped
 puede entrar el día en que otro sale.
 
+### Facturas
+
+| Método y ruta | Acceso | Descripción |
+|---|---|---|
+| `GET /api/reservas/{id}/factura` | Solo el huésped o el anfitrión de esa reserva | Factura de la reserva. |
+
+```json
+200 OK
+{
+  "numero": 1, "fechaEmision": "2026-10-14T18:30:12Z",
+  "reservaId": "56e517b4-5609-411d-891f-6708460b7add",
+  "huespedNombre": "Laura Gómez", "huespedEmail": "laura@upland.test",
+  "anfitrionNombre": "Ana Rojas", "anfitrionEmail": "ana@upland.test",
+  "alojamientoTitulo": "Apartamento moderno en Cabecera", "alojamientoCiudad": "Bucaramanga",
+  "fechaEntrada": "2027-08-10", "fechaSalida": "2027-08-13",
+  "noches": 3, "precioNoche": 180000.00, "total": 540000.00
+}
+```
+
+La factura se emite sola al crear la reserva, en la misma transacción, y guarda una copia de
+los datos de ese momento. Cualquier otro usuario recibe 403. En la interfaz se muestra como
+`UP-000001` y se puede imprimir o guardar como PDF desde el navegador. Es un documento de
+demostración: no es una factura electrónica ante la DIAN y no incluye impuestos.
+
 ## Cómo se desarrolló la solución
 
 Se construyó por rebanadas verticales, cada una terminada y probada antes de la siguiente.
@@ -449,7 +474,10 @@ No hay todavía tests automatizados dentro del repositorio. La verificación se 
 el sistema real:
 
 - 15 casos de autenticación, 21 del CRUD, 19 de reservas y 21 de búsqueda contra la API.
-- 20 reservas simultáneas sobre las mismas fechas: una recibió 201 y diecinueve 409.
+- 20 reservas simultáneas sobre las mismas fechas: una recibió 201 y diecinueve 409. Con
+  la factura incluida, de 10 simultáneas quedó una sola reserva con una sola factura.
+- La factura: la ven el huésped y el anfitrión, los demás reciben 403, y la base rechaza
+  una factura cuyo total no cuadre.
 - Recorrido completo de la aplicación React en un navegador real (38 comprobaciones),
   incluidos los filtros, la reserva, el CRUD y el manejo del token.
 - La fase 1 se volvió a recorrer completa sobre su propia base de datos.

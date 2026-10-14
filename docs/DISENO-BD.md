@@ -4,13 +4,14 @@ Upland usa PostgreSQL 16 como única fuente de verdad. El esquema se crea con mi
 de Flyway versionadas en [`backend/src/main/resources/db/migration`](../backend/src/main/resources/db/migration);
 Hibernate solo lo valida al arrancar (`ddl-auto: validate`) y nunca lo modifica.
 
-Este documento cubre el modelo completo del proyecto. No todo está construido en la fase 1:
+Este documento cubre el modelo completo del proyecto en la fase 2. No todo está construido:
 
 | Tabla | Estado | Migración |
 |---|---|---|
 | `usuarios` | Implementada | `V1__usuarios_y_alojamientos.sql` |
-| `alojamientos` | Implementada | `V1__usuarios_y_alojamientos.sql` |
+| `alojamientos` | Implementada | `V1__usuarios_y_alojamientos.sql`; columnas de catálogo en `V3__atributos_de_alojamiento.sql` e índices de búsqueda en `V4__indices_de_busqueda.sql` |
 | `reservas` | Implementada | `V2__reservas.sql` |
+| `facturas` | Implementada | `V5__facturas.sql` |
 | `bloqueos_disponibilidad` | Diseñada, sin implementar | — |
 | `resenas` | Diseñada, sin implementar | — |
 | `pagos` | Diseñada, sin implementar | — |
@@ -23,6 +24,7 @@ erDiagram
     usuarios ||--o{ reservas : "hace como huesped"
     alojamientos ||--o{ reservas : "recibe"
     alojamientos ||--o{ bloqueos_disponibilidad : "tiene"
+    reservas ||--o| facturas : "genera"
     reservas ||--o| resenas : "se califica con"
     reservas ||--o{ pagos : "se paga con"
 
@@ -49,6 +51,16 @@ erDiagram
         numeric precio_noche "mayor que 0"
         boolean activo "baja logica"
         timestamptz fecha_creacion
+        varchar tipo "V3"
+        varchar zona "V3"
+        integer habitaciones "V3"
+        integer camas "V3"
+        numeric banos "V3"
+        array servicios "V3, text[]"
+        varchar foto_url "V3"
+        numeric calificacion "V3"
+        integer numero_resenas "V3"
+        varchar origen_id UK "V3, dataset"
     }
 
     reservas {
@@ -79,6 +91,23 @@ erDiagram
         timestamptz fecha_creacion
     }
 
+    facturas {
+        uuid id PK
+        bigint numero UK "consecutivo"
+        uuid reserva_id FK "unica"
+        uuid huesped_id FK
+        uuid anfitrion_id FK
+        varchar huesped_nombre "copia"
+        varchar anfitrion_nombre "copia"
+        varchar alojamiento_titulo "copia"
+        date fecha_entrada
+        date fecha_salida
+        integer noches
+        numeric precio_noche
+        numeric total "noches por precio"
+        timestamptz fecha_emision
+    }
+
     pagos {
         uuid id PK
         uuid reserva_id FK
@@ -87,6 +116,9 @@ erDiagram
         timestamptz fecha_creacion
     }
 ```
+
+En el diagrama de `facturas` se omiten, por espacio, los correos y la ciudad, que también
+se copian; la tabla completa está más abajo.
 
 Cómo leer las líneas: `||--o{` es una relación de uno a muchos donde el lado "muchos" es
 opcional. Un usuario puede no tener alojamientos o tener varios, pero cada alojamiento
@@ -100,6 +132,7 @@ pertenece a exactamente un usuario.
 | `usuarios` → `reservas` | 1 a N | Un usuario hace cero o más reservas como huésped. |
 | `alojamientos` → `reservas` | 1 a N | Un alojamiento recibe cero o más reservas. |
 | `alojamientos` → `bloqueos_disponibilidad` | 1 a N | Un anfitrión bloquea cero o más rangos de fechas de su alojamiento. |
+| `reservas` → `facturas` | 1 a 0..1 | Toda reserva que crea la aplicación sale con su factura; la base garantiza que no haya dos. |
 | `reservas` → `resenas` | 1 a 0..1 | Una reserva tiene como máximo una reseña. |
 | `reservas` → `pagos` | 1 a N | Una reserva puede tener varios intentos de pago. |
 
@@ -143,6 +176,15 @@ Restricciones:
 | `capacidad` | `integer` | No | Mayor que cero. |
 | `precio_noche` | `numeric(12,2)` | No | Mayor que cero. |
 | `activo` | `boolean` | No | El borrado es lógico: la fila se conserva con `false`. |
+| `tipo` | `varchar(30)` | No | `ALOJAMIENTO_ENTERO` (por defecto), `HABITACION_PRIVADA`, `HABITACION_COMPARTIDA` u `HOTEL`. V3. |
+| `zona` | `varchar(100)` | Sí | Barrio o localidad. V3. |
+| `habitaciones`, `camas` | `integer` | Sí | No negativos. V3. |
+| `banos` | `numeric(3,1)` | Sí | Admite medios baños (1.5). V3. |
+| `servicios` | `text[]` | No | Arreglo, por defecto vacío. V3. |
+| `foto_url` | `varchar(500)` | Sí | V3. |
+| `calificacion` | `numeric(3,2)` | Sí | De 0 a 5. Hoy viene del dataset importado. V3. |
+| `numero_resenas` | `integer` | No | Por defecto 0. V3. |
+| `origen_id` | `varchar(60)` | Sí | Único. Identificador en la fuente externa, para que la importación no duplique. V3. |
 | `fecha_creacion` | `timestamptz` | No | |
 
 Restricciones e índices:
@@ -154,6 +196,22 @@ Restricciones e índices:
 - `ck_alojamientos_coordenadas_juntas`: latitud y longitud se guardan las dos o ninguna.
 - `idx_alojamientos_anfitrion`: índice sobre `anfitrion_id`. PostgreSQL no indexa las
   claves foráneas por sí solo y esta columna sirve a la consulta "mis alojamientos".
+- V3 agrega `ck_alojamientos_tipo`, `ck_alojamientos_habitaciones`, `ck_alojamientos_camas`,
+  `ck_alojamientos_banos`, `ck_alojamientos_calificacion`, `ck_alojamientos_numero_resenas` y
+  `uq_alojamientos_origen`.
+- **Servicios como arreglo y no como tabla aparte.** Solo se leen y se filtran junto con su
+  alojamiento. Una tabla `alojamiento_servicios` sería lo clásico, pero obligaría a un `JOIN`
+  o a una subconsulta por cada búsqueda.
+
+Índices de búsqueda (V4), agregados después de medir la consulta que acelera cada uno
+([MEDICION-BUSQUEDA.md](MEDICION-BUSQUEDA.md)):
+
+- `idx_alojamientos_populares` sobre `(numero_resenas DESC, id)`, parcial `WHERE activo`: el
+  orden por defecto del catálogo.
+- `idx_alojamientos_ciudad_zona` sobre `(ciudad, zona)`, parcial `WHERE activo`: filtros por
+  ubicación y conteos.
+- `idx_alojamientos_servicios`, de tipo GIN sobre `servicios`: el filtro "tiene todos estos
+  servicios" (`@>`). Un B-tree no sirve para buscar dentro de un arreglo.
 
 ### `reservas`
 
@@ -211,6 +269,44 @@ Otras restricciones e índices: `fk_reservas_alojamiento`, `fk_reservas_huesped`
 `ck_reservas_fechas` (`fecha_salida > fecha_entrada`), `ck_reservas_valor`,
 `ck_reservas_estado`, `idx_reservas_huesped` e `idx_reservas_alojamiento`.
 
+### `facturas`
+
+Una por reserva, emitida en la misma transacción que la crea: o se guardan las dos o
+ninguna. Solo pueden verla el huésped y el anfitrión de esa reserva.
+
+| Columna | Tipo | Nulo | Notas |
+|---|---|---|---|
+| `id` | `uuid` | No | Clave primaria. |
+| `numero` | `bigint` | No | Consecutivo, `GENERATED ALWAYS AS IDENTITY`. Único. |
+| `reserva_id` | `uuid` | No | Clave foránea a `reservas(id)`. Única. |
+| `huesped_id`, `anfitrion_id` | `uuid` | No | Claves foráneas a `usuarios(id)`. Deciden quién puede ver la factura. |
+| `huesped_nombre`, `huesped_email` | `varchar` | No | Copia al momento de emitir. |
+| `anfitrion_nombre`, `anfitrion_email` | `varchar` | No | Copia al momento de emitir. |
+| `alojamiento_titulo`, `alojamiento_ciudad` | `varchar` | No | Copia al momento de emitir. |
+| `fecha_entrada`, `fecha_salida` | `date` | No | |
+| `noches` | `integer` | No | |
+| `precio_noche`, `total` | `numeric(12,2)` | No | |
+| `fecha_emision` | `timestamptz` | No | |
+
+Decisiones:
+
+- **Copia de los datos, no referencias.** Una factura emitida no debe cambiar. Si después el
+  anfitrión cambia el título o el precio, o un usuario cambia su nombre, la factura sigue
+  mostrando lo que se acordó. Por eso guarda su propia copia en vez de leerlos de
+  `alojamientos` y `usuarios` cada vez.
+- **Numeración con `IDENTITY`.** Es una secuencia de PostgreSQL: asigna números sin bloquear
+  a nadie. El costo es que puede quedar un hueco si una transacción toma un número y después
+  falla. Un contador en una tabla, actualizado con bloqueo, evitaría los huecos a cambio de
+  que las facturas se emitan de a una.
+- **La base comprueba las cuentas.** `ck_facturas_noches` exige `noches = fecha_salida -
+  fecha_entrada` y `ck_facturas_total` exige `total = precio_noche * noches`: una factura
+  con la suma mal hecha no se puede guardar.
+- **Sin impuestos.** Es un documento de demostración y lo dice: no es una factura
+  electrónica ante la DIAN.
+
+Las reservas que existían antes de la migración recibieron su factura en la misma `V5`,
+numeradas en el orden en que se hicieron.
+
 ## Tablas diseñadas, sin implementar
 
 No tienen migración todavía. Cada una recibirá la suya cuando se construya su módulo.
@@ -237,7 +333,11 @@ No tienen migración todavía. Cada una recibirá la suya cuando se construya su
 
 ## Fase 2
 
-Este diagrama no cambia en la fase 2. MongoDB entra como modelo de lectura derivado: una
-copia desnormalizada de los alojamientos optimizada para la búsqueda, alimentada desde
-PostgreSQL. Se documentará aparte como modelo de documentos; PostgreSQL sigue siendo la
-fuente de verdad.
+En la fase 2 el modelo relacional crece sin cambiar de forma: `V3` agrega a `alojamientos`
+los atributos que necesita un catálogo con filtros, y `V4` los índices de búsqueda. Con ellos
+se importaron 18.744 alojamientos reales de Bogotá (Inside Airbnb), con anfitriones
+ficticios en `usuarios`.
+
+MongoDB entrará como modelo de lectura derivado: una copia desnormalizada de los
+alojamientos, con sus rangos ocupados, alimentada desde PostgreSQL. Se documentará aparte
+como modelo de documentos; PostgreSQL sigue siendo la fuente de verdad.
