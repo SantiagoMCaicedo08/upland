@@ -3,6 +3,7 @@ import Encabezado from './componentes/Encabezado.jsx';
 import RutaProtegida from './componentes/RutaProtegida.jsx';
 import Catalogo from './paginas/Catalogo.jsx';
 import Detalle from './paginas/Detalle.jsx';
+import Factura from './paginas/Factura.jsx';
 import FormularioAlojamiento from './paginas/FormularioAlojamiento.jsx';
 import Login from './paginas/Login.jsx';
 import Panel from './paginas/Panel.jsx';
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/panel" element={<RutaProtegida><Panel /></RutaProtegida>} />
         <Route path="/publicar" element={<RutaProtegida><FormularioAlojamiento /></RutaProtegida>} />
         <Route path="/alojamientos/:id/editar" element={<RutaProtegida><FormularioAlojamiento /></RutaProtegida>} />
+        <Route path="/reservas/:id/factura" element={<RutaProtegida><Factura /></RutaProtegida>} />
         <Route path="*" element={<NoEncontrada />} />
       </Routes>
       <footer className="pie">

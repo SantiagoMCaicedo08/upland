@@ -178,6 +178,7 @@ function ListaDeReservas({ reservas }) {
           <div className="fila-valor">
             <strong>{formatearPrecio(reserva.valorTotal)}</strong>
             <span className="estado">{NOMBRES_ESTADO[reserva.estado] ?? reserva.estado}</span>
+            <Link to={`/reservas/${reserva.id}/factura`} className="enlace-factura">Ver factura</Link>
           </div>
         </li>
       ))}

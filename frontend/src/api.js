@@ -123,3 +123,9 @@ export function reservasRecibidas() {
 export function obtenerOcupacion(alojamientoId) {
   return peticion('GET', `/api/reservas/ocupacion?alojamientoId=${encodeURIComponent(alojamientoId)}`, { conToken: false });
 }
+
+// --- Facturas ---
+
+export function obtenerFactura(reservaId) {
+  return peticion('GET', `/api/reservas/${encodeURIComponent(reservaId)}/factura`);
+}
