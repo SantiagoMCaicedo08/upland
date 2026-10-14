@@ -13,8 +13,39 @@
 
   <main class="contenedor">
     <h1>Alojamientos en Santander</h1>
+
+    <form id="filtros" class="filtros" role="search">
+      <div class="campo">
+        <label for="ciudad">Ciudad</label>
+        <select id="ciudad" name="ciudad">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="huespedes">Huéspedes</label>
+        <input id="huespedes" name="huespedes" type="number" min="1" placeholder="Cualquiera">
+      </div>
+      <div class="campo">
+        <label for="precioMax">Precio máximo</label>
+        <input id="precioMax" name="precioMax" type="number" min="1" step="1000" placeholder="Por noche">
+      </div>
+      <div class="campo">
+        <label for="entrada">Entrada</label>
+        <input id="entrada" name="entrada" type="date">
+      </div>
+      <div class="campo">
+        <label for="salida">Salida</label>
+        <input id="salida" name="salida" type="date">
+      </div>
+      <div class="filtros-acciones">
+        <button type="submit" class="boton">Buscar</button>
+        <button id="limpiar" type="button" class="boton boton-secundario">Limpiar</button>
+      </div>
+    </form>
+
+    <p id="resumen" class="suave resumen"></p>
     <div id="error" class="error" role="alert" hidden></div>
-    <p id="vacio" class="suave" hidden>Todavía no hay alojamientos publicados.</p>
+    <p id="vacio" class="suave" hidden></p>
 
     <section id="catalogo" class="rejilla" aria-label="Catálogo"></section>
 

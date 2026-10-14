@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Factura · Upland</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="cabecera no-imprimir">
+    <nav id="nav" class="nav" aria-label="Principal"></nav>
+  </header>
+
+  <main class="contenedor contenedor-medio">
+    <div class="factura-acciones no-imprimir">
+      <a href="panel.html" class="boton boton-secundario">Volver a mi panel</a>
+      <button id="imprimir" type="button" class="boton" hidden>Imprimir o guardar PDF</button>
+    </div>
+    <div id="error" class="error" role="alert" hidden></div>
+
+    <article id="factura" class="factura" hidden>
+      <header class="factura-cabecera">
+        <div>
+          <p class="factura-marca">Upland</p>
+          <p class="suave">Plataforma de reserva de alojamientos</p>
+        </div>
+        <div class="factura-numero">
+          <p class="suave">Factura</p>
+          <p id="numero" class="total"></p>
+          <p id="emision" class="suave"></p>
+        </div>
+      </header>
+
+      <div class="factura-partes">
+        <section>
+          <h2>Huésped</h2>
+          <p id="huesped-nombre"></p>
+          <p id="huesped-email" class="suave"></p>
+        </section>
+        <section>
+          <h2>Anfitrión</h2>
+          <p id="anfitrion-nombre"></p>
+          <p id="anfitrion-email" class="suave"></p>
+        </section>
+      </div>
+
+      <table class="factura-detalle">
+        <thead>
+          <tr>
+            <th>Descripción</th>
+            <th>Noches</th>
+            <th>Precio por noche</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong id="alojamiento"></strong>
+              <span id="estadia" class="suave"></span>
+            </td>
+            <td id="noches"></td>
+            <td id="precio"></td>
+            <td id="subtotal"></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="3">Total</th>
+            <td id="total"></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <p class="factura-nota suave">
+        Documento de demostración generado por Upland, proyecto académico de la Universidad Industrial
+        de Santander. No es una factura electrónica ante la DIAN y no incluye impuestos.
+      </p>
+    </article>
+  </main>
+
+  <script type="module" src="js/factura.js"></script>
+</body>
+</html>

@@ -47,6 +47,7 @@ function crearFilaReserva(reserva) {
     `${reserva.alojamientoCiudad} · ${formatearFecha(reserva.fechaEntrada)} → ${formatearFecha(reserva.fechaSalida)} · ${describirNoches(reserva.noches)}`;
   fila.querySelector('.reserva-total').textContent = formatearPrecio(reserva.valorTotal);
   fila.querySelector('.reserva-estado').textContent = NOMBRES_ESTADO[reserva.estado] ?? reserva.estado;
+  fila.querySelector('.enlace-factura').href = `factura.html?reserva=${encodeURIComponent(reserva.id)}`;
 
   if (reserva.huespedNombre) {
     const huesped = fila.querySelector('.reserva-huesped');

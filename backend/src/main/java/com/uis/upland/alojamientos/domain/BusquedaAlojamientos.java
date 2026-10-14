@@ -1,5 +1,7 @@
 package com.uis.upland.alojamientos.domain;
 
+import java.util.List;
+
 import com.uis.upland.shared.Pagina;
 
 /**
@@ -9,6 +11,9 @@ import com.uis.upland.shared.Pagina;
  */
 public interface BusquedaAlojamientos {
 
-	Pagina<ResumenAlojamiento> listarActivos(int pagina, int tamano);
+	Pagina<ResumenAlojamiento> buscar(CriteriosBusqueda criterios, int pagina, int tamano);
+
+	/** Ciudades que tienen al menos un alojamiento activo, para ofrecerlas en el filtro. */
+	List<String> ciudades();
 
 }

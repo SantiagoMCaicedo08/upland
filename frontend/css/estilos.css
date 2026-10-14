@@ -346,3 +346,149 @@ a {
   padding-left: 1.2rem;
   color: var(--texto-suave);
 }
+
+.enlace-factura {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* --- Filtros del catálogo --- */
+
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-items: end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+}
+
+.filtros-acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.resumen {
+  margin: 0 0 1rem;
+}
+
+/* --- Factura --- */
+
+.factura-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.factura {
+  display: grid;
+  gap: 1.75rem;
+  padding: 2rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+}
+
+.factura-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--acento);
+}
+
+.factura-marca {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--acento-oscuro);
+}
+
+/* margin-left: auto lo mantiene a la derecha aunque pase a su propia línea en pantallas angostas. */
+.factura-numero {
+  margin-left: auto;
+  text-align: right;
+}
+
+.factura-numero p,
+.factura-partes p {
+  margin: 0;
+}
+
+.factura-numero .total {
+  font-size: 1.3rem;
+}
+
+.factura-partes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.factura-partes h2 {
+  margin: 0 0 0.3rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.factura-detalle {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.factura-detalle th,
+.factura-detalle td {
+  padding: 0.7rem 0.5rem;
+  border-bottom: 1px solid var(--borde);
+  text-align: right;
+  vertical-align: top;
+}
+
+.factura-detalle th:first-child,
+.factura-detalle td:first-child {
+  text-align: left;
+}
+
+.factura-detalle td:first-child span {
+  display: block;
+}
+
+.factura-detalle tfoot th,
+.factura-detalle tfoot td {
+  border-bottom: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.factura-nota {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+/* Al imprimir solo sale la factura: sin menú, sin botones y sin fondo de color. */
+@media print {
+  .no-imprimir {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  .contenedor {
+    padding: 0;
+  }
+
+  .factura {
+    padding: 0;
+    border: 0;
+  }
+}

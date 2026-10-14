@@ -62,8 +62,17 @@ export function obtenerYo() {
 
 // --- Alojamientos ---
 
-export function listarAlojamientos(pagina, tamano) {
-  return peticion('GET', `/api/alojamientos?pagina=${pagina}&tamano=${tamano}`, { conToken: false });
+// Recibe los filtros como objeto y omite los vacíos: ?ciudad= no se envía.
+export function listarAlojamientos(filtros) {
+  const parametros = new URLSearchParams();
+  for (const [clave, valor] of Object.entries(filtros)) {
+    if (valor !== '' && valor !== null && valor !== undefined) parametros.set(clave, valor);
+  }
+  return peticion('GET', `/api/alojamientos?${parametros}`, { conToken: false });
+}
+
+export function obtenerCiudades() {
+  return peticion('GET', '/api/alojamientos/ciudades', { conToken: false });
 }
 
 export function obtenerAlojamiento(id) {
@@ -103,4 +112,10 @@ export function reservasRecibidas() {
 
 export function obtenerOcupacion(alojamientoId) {
   return peticion('GET', `/api/reservas/ocupacion?alojamientoId=${encodeURIComponent(alojamientoId)}`, { conToken: false });
+}
+
+// --- Facturas ---
+
+export function obtenerFactura(reservaId) {
+  return peticion('GET', `/api/reservas/${encodeURIComponent(reservaId)}/factura`);
 }

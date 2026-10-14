@@ -57,6 +57,11 @@ function prepararAcciones(alojamiento) {
     const hoy = new Date().toLocaleDateString('sv-SE');
     formulario.elements.fechaEntrada.min = hoy;
     formulario.elements.fechaSalida.min = hoy;
+    // Si se llegó desde una búsqueda con fechas, vienen en la URL y se usan de entrada.
+    const parametros = new URLSearchParams(window.location.search);
+    formulario.elements.fechaEntrada.value = parametros.get('entrada') ?? '';
+    formulario.elements.fechaSalida.value = parametros.get('salida') ?? '';
+    actualizarResumen();
     document.getElementById('seccion-reserva').hidden = false;
   }
 }

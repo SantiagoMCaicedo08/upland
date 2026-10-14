@@ -1,8 +1,11 @@
 package com.uis.upland.alojamientos.api;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uis.upland.alojamientos.domain.AlojamientoService;
+import com.uis.upland.alojamientos.domain.CriteriosBusqueda;
 import com.uis.upland.alojamientos.domain.ResumenAlojamiento;
 import com.uis.upland.shared.Pagina;
 import com.uis.upland.shared.security.UsuarioAutenticado;
@@ -34,10 +38,26 @@ public class AlojamientoController {
 		this.alojamientoService = alojamientoService;
 	}
 
+	/** Catálogo público. Los filtros son opcionales y se combinan entre sí. */
 	@GetMapping
-	public Pagina<ResumenAlojamiento> listar(@RequestParam(defaultValue = "0") int pagina,
+	public Pagina<ResumenAlojamiento> buscar(
+			@RequestParam(required = false) String ciudad,
+			@RequestParam(required = false) Integer huespedes,
+			@RequestParam(required = false) BigDecimal precioMax,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entrada,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate salida,
+			@RequestParam(defaultValue = "0") int pagina,
 			@RequestParam(defaultValue = "12") int tamano) {
-		return alojamientoService.listar(pagina, tamano);
+		// Un parámetro que llega vacío (?ciudad=) cuenta como ausente.
+		String ciudadFiltrada = ciudad == null || ciudad.isBlank() ? null : ciudad.trim();
+		CriteriosBusqueda criterios = new CriteriosBusqueda(ciudadFiltrada, huespedes, precioMax, entrada, salida);
+		return alojamientoService.buscar(criterios, pagina, tamano);
+	}
+
+	/** Público: ciudades con alojamientos, para la lista del filtro. */
+	@GetMapping("/ciudades")
+	public List<String> ciudades() {
+		return alojamientoService.ciudades();
 	}
 
 	@GetMapping("/mios")

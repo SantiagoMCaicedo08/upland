@@ -26,9 +26,19 @@ public class AlojamientoService {
 		this.busquedaAlojamientos = busquedaAlojamientos;
 	}
 
-	public Pagina<ResumenAlojamiento> listar(int pagina, int tamano) {
+	public Pagina<ResumenAlojamiento> buscar(CriteriosBusqueda criterios, int pagina, int tamano) {
+		if ((criterios.entrada() == null) != (criterios.salida() == null)) {
+			throw new BusquedaInvalidaException("Para filtrar por fechas indica la entrada y la salida");
+		}
+		if (criterios.entrada() != null && !criterios.salida().isAfter(criterios.entrada())) {
+			throw new BusquedaInvalidaException("La fecha de salida debe ser posterior a la de entrada");
+		}
 		// Se acota aquí para que nadie pida un millón de filas con ?tamano=1000000.
-		return busquedaAlojamientos.listarActivos(Math.max(pagina, 0), Math.clamp(tamano, 1, TAMANO_MAXIMO));
+		return busquedaAlojamientos.buscar(criterios, Math.max(pagina, 0), Math.clamp(tamano, 1, TAMANO_MAXIMO));
+	}
+
+	public List<String> ciudades() {
+		return busquedaAlojamientos.ciudades();
 	}
 
 	/**
