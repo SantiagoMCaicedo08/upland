@@ -9,16 +9,19 @@ import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.uis.upland.alojamientos.domain.AlojamientoService;
 import com.uis.upland.alojamientos.domain.ResumenAlojamiento;
+import com.uis.upland.facturas.domain.DatosFactura;
+import com.uis.upland.facturas.domain.FacturaService;
 import com.uis.upland.reservas.infra.ReservaRepository;
 import com.uis.upland.usuarios.domain.ContactoUsuario;
 import com.uis.upland.usuarios.domain.UsuarioService;
 
 /**
  * Habla con los otros módulos solo por sus servicios públicos (AlojamientoService,
- * UsuarioService), nunca por sus repositorios ni sus entidades.
+ * UsuarioService, FacturaService), nunca por sus repositorios ni sus entidades.
  */
 @Service
 public class ReservaService {
@@ -28,14 +31,18 @@ public class ReservaService {
 	private final ReservaRepository reservaRepository;
 	private final AlojamientoService alojamientoService;
 	private final UsuarioService usuarioService;
+	private final FacturaService facturaService;
 
 	public ReservaService(ReservaRepository reservaRepository, AlojamientoService alojamientoService,
-			UsuarioService usuarioService) {
+			UsuarioService usuarioService, FacturaService facturaService) {
 		this.reservaRepository = reservaRepository;
 		this.alojamientoService = alojamientoService;
 		this.usuarioService = usuarioService;
+		this.facturaService = facturaService;
 	}
 
+	// Transaccional para que la reserva y su factura se guarden juntas o ninguna de las dos.
+	@Transactional
 	public ReservaDetallada crear(UUID huespedId, UUID alojamientoId, LocalDate entrada, LocalDate salida) {
 		if (!salida.isAfter(entrada)) {
 			throw new FechasInvalidasException("La fecha de salida debe ser posterior a la de entrada");
@@ -68,6 +75,12 @@ public class ReservaService {
 			}
 			throw e;
 		}
+
+		Map<UUID, ContactoUsuario> personas = usuarioService.contactos(List.of(huespedId, alojamiento.anfitrionId()));
+		facturaService.emitir(new DatosFactura(reserva.getId(), personas.get(huespedId),
+				personas.get(alojamiento.anfitrionId()), alojamiento.titulo(), alojamiento.ciudad(), entrada, salida,
+				alojamiento.precioNoche()));
+
 		return new ReservaDetallada(reserva, alojamiento, null);
 	}
 
