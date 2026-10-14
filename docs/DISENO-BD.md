@@ -11,11 +11,14 @@ Este documento cubre el modelo completo del proyecto. No todo está construido e
 | `usuarios` | Implementada | `V1__usuarios_y_alojamientos.sql` |
 | `alojamientos` | Implementada | `V1__usuarios_y_alojamientos.sql` |
 | `reservas` | Implementada | `V2__reservas.sql` |
+| `facturas` | Implementada | `V5__facturas.sql` |
 | `bloqueos_disponibilidad` | Diseñada, sin implementar | — |
 | `resenas` | Diseñada, sin implementar | — |
 | `pagos` | Diseñada, sin implementar | — |
 
 ## Diagrama entidad-relación
+
+La misma figura como imagen, para presentaciones: [diagrama-er.png](diagrama-er.png).
 
 ```mermaid
 erDiagram
@@ -23,6 +26,7 @@ erDiagram
     usuarios ||--o{ reservas : "hace como huesped"
     alojamientos ||--o{ reservas : "recibe"
     alojamientos ||--o{ bloqueos_disponibilidad : "tiene"
+    reservas ||--o| facturas : "genera"
     reservas ||--o| resenas : "se califica con"
     reservas ||--o{ pagos : "se paga con"
 
@@ -79,6 +83,23 @@ erDiagram
         timestamptz fecha_creacion
     }
 
+    facturas {
+        uuid id PK
+        bigint numero UK "consecutivo"
+        uuid reserva_id FK "unica"
+        uuid huesped_id FK
+        uuid anfitrion_id FK
+        varchar huesped_nombre "copia"
+        varchar anfitrion_nombre "copia"
+        varchar alojamiento_titulo "copia"
+        date fecha_entrada
+        date fecha_salida
+        integer noches
+        numeric precio_noche
+        numeric total "noches por precio"
+        timestamptz fecha_emision
+    }
+
     pagos {
         uuid id PK
         uuid reserva_id FK
@@ -87,6 +108,9 @@ erDiagram
         timestamptz fecha_creacion
     }
 ```
+
+En el diagrama de `facturas` se omiten, por espacio, los correos y la ciudad, que también
+se copian; la tabla completa está más abajo.
 
 Cómo leer las líneas: `||--o{` es una relación de uno a muchos donde el lado "muchos" es
 opcional. Un usuario puede no tener alojamientos o tener varios, pero cada alojamiento
@@ -100,6 +124,7 @@ pertenece a exactamente un usuario.
 | `usuarios` → `reservas` | 1 a N | Un usuario hace cero o más reservas como huésped. |
 | `alojamientos` → `reservas` | 1 a N | Un alojamiento recibe cero o más reservas. |
 | `alojamientos` → `bloqueos_disponibilidad` | 1 a N | Un anfitrión bloquea cero o más rangos de fechas de su alojamiento. |
+| `reservas` → `facturas` | 1 a 0..1 | Toda reserva que crea la aplicación sale con su factura; la base garantiza que no haya dos. |
 | `reservas` → `resenas` | 1 a 0..1 | Una reserva tiene como máximo una reseña. |
 | `reservas` → `pagos` | 1 a N | Una reserva puede tener varios intentos de pago. |
 
@@ -210,6 +235,44 @@ PostgreSQL, sin pasar por la aplicación, también se rechaza.
 Otras restricciones e índices: `fk_reservas_alojamiento`, `fk_reservas_huesped`,
 `ck_reservas_fechas` (`fecha_salida > fecha_entrada`), `ck_reservas_valor`,
 `ck_reservas_estado`, `idx_reservas_huesped` e `idx_reservas_alojamiento`.
+
+### `facturas`
+
+Una por reserva, emitida en la misma transacción que la crea: o se guardan las dos o
+ninguna. Solo pueden verla el huésped y el anfitrión de esa reserva.
+
+| Columna | Tipo | Nulo | Notas |
+|---|---|---|---|
+| `id` | `uuid` | No | Clave primaria. |
+| `numero` | `bigint` | No | Consecutivo, `GENERATED ALWAYS AS IDENTITY`. Único. |
+| `reserva_id` | `uuid` | No | Clave foránea a `reservas(id)`. Única. |
+| `huesped_id`, `anfitrion_id` | `uuid` | No | Claves foráneas a `usuarios(id)`. Deciden quién puede ver la factura. |
+| `huesped_nombre`, `huesped_email` | `varchar` | No | Copia al momento de emitir. |
+| `anfitrion_nombre`, `anfitrion_email` | `varchar` | No | Copia al momento de emitir. |
+| `alojamiento_titulo`, `alojamiento_ciudad` | `varchar` | No | Copia al momento de emitir. |
+| `fecha_entrada`, `fecha_salida` | `date` | No | |
+| `noches` | `integer` | No | |
+| `precio_noche`, `total` | `numeric(12,2)` | No | |
+| `fecha_emision` | `timestamptz` | No | |
+
+Decisiones:
+
+- **Copia de los datos, no referencias.** Una factura emitida no debe cambiar. Si después el
+  anfitrión cambia el título o el precio, o un usuario cambia su nombre, la factura sigue
+  mostrando lo que se acordó. Por eso guarda su propia copia en vez de leerlos de
+  `alojamientos` y `usuarios` cada vez.
+- **Numeración con `IDENTITY`.** Es una secuencia de PostgreSQL: asigna números sin bloquear
+  a nadie. El costo es que puede quedar un hueco si una transacción toma un número y después
+  falla. Un contador en una tabla, actualizado con bloqueo, evitaría los huecos a cambio de
+  que las facturas se emitan de a una.
+- **La base comprueba las cuentas.** `ck_facturas_noches` exige `noches = fecha_salida -
+  fecha_entrada` y `ck_facturas_total` exige `total = precio_noche * noches`: una factura
+  con la suma mal hecha no se puede guardar.
+- **Sin impuestos.** Es un documento de demostración y lo dice: no es una factura
+  electrónica ante la DIAN.
+
+Las reservas que existían antes de la migración recibieron su factura en la misma `V5`,
+numeradas en el orden en que se hicieron.
 
 ## Tablas diseñadas, sin implementar
 

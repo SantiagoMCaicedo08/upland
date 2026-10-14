@@ -28,7 +28,9 @@ en el [diseño de la base de datos](docs/DISENO-BD.md).
 
 - Registro y login con JWT.
 - CRUD completo de alojamientos, protegido por rol y por propietario.
+- Catálogo con filtros por ciudad, huéspedes, precio máximo y fechas libres.
 - Reservas por rango de fechas, sin superposición.
+- Una factura por cada reserva, que el huésped y el anfitrión pueden ver e imprimir.
 - Panel del huésped (sus reservas) y del anfitrión (sus alojamientos, las reservas
   recibidas y el total ganado).
 
@@ -185,7 +187,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
 
 | Método y ruta | Acceso | Descripción |
 |---|---|---|
-| `GET /api/alojamientos?pagina=0&tamano=12` | Público | Catálogo paginado. |
+| `GET /api/alojamientos` | Público | Catálogo paginado, con filtros. |
+| `GET /api/alojamientos/ciudades` | Público | Ciudades con alojamientos, para el filtro. |
 | `GET /api/alojamientos/{id}` | Público | Detalle. |
 | `GET /api/alojamientos/mios` | Token | Los del anfitrión autenticado. |
 | `POST /api/alojamientos` | Rol `ANFITRION` | Crea. |
@@ -222,6 +225,16 @@ El dueño sale del token, nunca del cuerpo. Editar o borrar un alojamiento ajeno
 }
 ```
 
+Filtros del catálogo. Todos son opcionales y se combinan entre sí:
+
+| Parámetro | Ejemplo | Filtra por |
+|---|---|---|
+| `ciudad` | `ciudad=San Gil` | Ciudad exacta. |
+| `huespedes` | `huespedes=4` | Capacidad mínima. |
+| `precioMax` | `precioMax=200000` | Precio por noche máximo. |
+| `entrada`, `salida` | `entrada=2027-09-01&salida=2027-09-04` | Libre en ese rango. Van juntas. |
+| `pagina`, `tamano` | `pagina=0&tamano=12` | Paginación. El tamaño máximo es 50. |
+
 ### Reservas
 
 | Método y ruta | Acceso | Descripción |
@@ -254,6 +267,30 @@ Content-Type: application/json
 El total lo calcula el servidor a partir del precio del alojamiento. Si las fechas se
 cruzan con otra reserva confirmada responde 409. El día de salida queda libre: un huésped
 puede entrar el día en que otro sale.
+
+### Facturas
+
+| Método y ruta | Acceso | Descripción |
+|---|---|---|
+| `GET /api/reservas/{id}/factura` | Solo el huésped o el anfitrión de esa reserva | Factura de la reserva. |
+
+```json
+200 OK
+{
+  "numero": 1, "fechaEmision": "2026-10-14T18:30:12Z",
+  "reservaId": "56e517b4-5609-411d-891f-6708460b7add",
+  "huespedNombre": "Laura Gómez", "huespedEmail": "laura@upland.test",
+  "anfitrionNombre": "Ana Rojas", "anfitrionEmail": "ana@upland.test",
+  "alojamientoTitulo": "Apartamento moderno en Cabecera", "alojamientoCiudad": "Bucaramanga",
+  "fechaEntrada": "2027-08-10", "fechaSalida": "2027-08-13",
+  "noches": 3, "precioNoche": 180000.00, "total": 540000.00
+}
+```
+
+La factura se emite sola al crear la reserva, en la misma transacción. Cualquier otro
+usuario recibe 403. En la interfaz se muestra como `UP-000001` y se puede imprimir o
+guardar como PDF desde el navegador. Es un documento de demostración: no es una factura
+electrónica ante la DIAN y no incluye impuestos.
 
 ## Cómo se desarrolló la solución
 
@@ -307,9 +344,12 @@ No hay todavía tests automatizados dentro del repositorio. La verificación se 
 el sistema real:
 
 - 15 casos de autenticación, 21 del CRUD y 19 de reservas contra la API.
-- 20 reservas simultáneas sobre las mismas fechas: una recibió 201 y diecinueve 409.
+- 20 reservas simultáneas sobre las mismas fechas: una recibió 201 y diecinueve 409. Con
+  la factura incluida, de 10 simultáneas quedó una sola reserva con una sola factura.
+- La factura: la ven el huésped y el anfitrión, los demás reciben 403, y la base rechaza
+  una factura cuyo total no cuadre.
 - Recorrido completo en un navegador real, incluida la comprobación de CORS desde
-  `localhost` y `127.0.0.1`.
+  `localhost` y `127.0.0.1`, los filtros y la factura.
 
 ## Hacia la fase 2
 
