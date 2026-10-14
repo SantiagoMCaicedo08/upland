@@ -43,7 +43,7 @@ if ("$existe".Trim() -ne '1') {
 Write-Host '4/6 Backend (se abre en otra ventana)' -ForegroundColor Cyan
 # La ventana nueva hereda esta variable: es lo que apunta el backend a la base de la fase 1.
 $env:DB_URL = "jdbc:postgresql://localhost:5432/$base"
-Start-Process powershell -WorkingDirectory (Join-Path $carpeta 'backend') -ArgumentList '-NoExit', '-Command', "`$Host.UI.RawUI.WindowTitle = 'Upland fase 1 - backend'; .\mvnw.cmd spring-boot:run"
+Start-Process powershell -WorkingDirectory (Join-Path $carpeta 'backend') -ArgumentList '-NoExit', '-Command', (Get-ComandoBackend 'Upland fase 1 - backend')
 Remove-Item Env:DB_URL
 if (-not (Wait-Puerto 8080 180)) { Write-Host 'El backend no arranco. Revisa su ventana.' -ForegroundColor Red; exit 1 }
 

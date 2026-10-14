@@ -20,7 +20,7 @@ Write-Host '2/4 PostgreSQL' -ForegroundColor Cyan
 if (-not (Start-PostgreSQL $raiz)) { exit 1 }
 
 Write-Host '3/4 Backend (se abre en otra ventana)' -ForegroundColor Cyan
-Start-Process powershell -WorkingDirectory (Join-Path $raiz 'backend') -ArgumentList '-NoExit', '-Command', "`$Host.UI.RawUI.WindowTitle = 'Upland fase 2 - backend'; .\mvnw.cmd spring-boot:run"
+Start-Process powershell -WorkingDirectory (Join-Path $raiz 'backend') -ArgumentList '-NoExit', '-Command', (Get-ComandoBackend 'Upland fase 2 - backend')
 if (-not (Wait-Puerto 8080 180)) { Write-Host 'El backend no arranco. Revisa su ventana.' -ForegroundColor Red; exit 1 }
 
 Write-Host '4/4 Frontend (se abre en otra ventana)' -ForegroundColor Cyan

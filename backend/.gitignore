@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Registros de caida de la JVM ###
+hs_err_pid*.log
+replay_pid*.log

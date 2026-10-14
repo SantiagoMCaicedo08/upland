@@ -1,6 +1,17 @@
 # Funciones que comparten iniciar-fase2.ps1 y presentar-fase1.ps1. No se ejecuta solo: los
 # otros dos scripts lo cargan con ". (Join-Path $PSScriptRoot 'comun.ps1')".
 
+# Comando que corre en la ventana del backend. No usa "mvnw spring-boot:run" porque eso deja
+# tres procesos de Java vivos (dos de Maven y la aplicación). Aquí Maven solo construye el .jar
+# y se cierra, y la aplicación corre sola con un tope de memoria: en un equipo de 6 GB con el
+# navegador, el editor y Docker abiertos, esa diferencia evita que Windows cierre procesos.
+function Get-ComandoBackend($titulo) {
+    "`$Host.UI.RawUI.WindowTitle = '$titulo'; " +
+    "Write-Host 'Compilando el backend...'; " +
+    ".\mvnw.cmd -q -B -DskipTests package; " +
+    "if (`$LASTEXITCODE -eq 0) { java -Xmx512m -jar target\upland-0.0.1-SNAPSHOT.jar }"
+}
+
 function Test-Puerto($puerto) {
     [bool](Get-NetTCPConnection -LocalPort $puerto -State Listen -ErrorAction SilentlyContinue)
 }
